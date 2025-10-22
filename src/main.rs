@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
-use tracing::{info, error, debug, instrument};
+use std::fs::{self, OpenOptions};
+use tracing::{info, error, debug};
 use tracing_subscriber;
 
 
@@ -34,8 +34,15 @@ fn import_data(path: &str) -> Result<Vec<json_data>, Box<dyn std::error::Error>>
 }
 
 fn main() {
+    let log_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("app.log")
+        .expect("Failed to open log file");
+
     tracing_subscriber::fmt()
         .json()
+        .with_writer(std::sync::Mutex::new(log_file))
         .init();
 
     info!("Starting app");
