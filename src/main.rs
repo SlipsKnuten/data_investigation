@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize};
-use std::fs;
-use log::{info, warn, error, debug};
+use std::fs::{self, OpenOptions};
+use std::io::Write;
+use log::{info, error, debug};
+use env_logger::Builder;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 struct json_data {
@@ -32,7 +35,17 @@ fn import_data(path: &str) -> Result<Vec<json_data>, Box<dyn std::error::Error>>
 }
 
 fn main() {
-    env_logger::init();
+    let log_file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("app.log")
+        .expect("Failed to open log file");
+
+    Builder::from_default_env()
+        .filter_level(log::LevelFilter::Info)
+        .target(env_logger::Target::Pipe(Box::new(log_file)))
+        .init();
+
     info!("Starting app");
 
 
