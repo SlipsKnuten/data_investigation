@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
-use std::fs::{self, OpenOptions};
-use std::io::Write;
-use log::{info, error, debug};
-use env_logger::Builder;
+use std::fs;
+use tracing::{info, error, debug, instrument};
+use tracing_subscriber;
 
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -35,15 +34,8 @@ fn import_data(path: &str) -> Result<Vec<json_data>, Box<dyn std::error::Error>>
 }
 
 fn main() {
-    let log_file = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("app.log")
-        .expect("Failed to open log file");
-
-    Builder::from_default_env()
-        .filter_level(log::LevelFilter::Info)
-        .target(env_logger::Target::Pipe(Box::new(log_file)))
+    tracing_subscriber::fmt()
+        .json()
         .init();
 
     info!("Starting app");
